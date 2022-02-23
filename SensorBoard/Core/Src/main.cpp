@@ -77,7 +77,15 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void* operator new(std::size_t sz)
+{
+    return pvPortMalloc(sz);
+}
 
+void operator delete(void* ptr) noexcept
+{
+	vPortFree(ptr);
+}
 /* USER CODE END 0 */
 
 /**

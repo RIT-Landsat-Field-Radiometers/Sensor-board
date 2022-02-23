@@ -37,6 +37,7 @@
 #include <cstdint>
 #include <stdio.h>
 #include <cmath>
+#include <algorithm>
 
 #include "device_specific/ADC/ads123S0_enums.h"
 #include "device_specific/ADC/ads124S0.h"
@@ -46,6 +47,8 @@
 #include "Logging/Logger.h"
 #include "CANOpenNode/OD.h"
 #include "301/CO_ODinterface.h"
+#include "sdmmc.h"
+#include "fatfs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -159,7 +162,12 @@ void MX_FREERTOS_Init(void)
 	/* creation of SysMonitor */
 //	SysMonitorHandle = osThreadNew(startMonitoring, (void*) nullptr,
 //			&SysMonitor_attributes);
-	osThreadNew(measurementTask, nullptr, nullptr);
+
+	osThreadAttr_t Task_attributes{0};
+	Task_attributes.stack_size = 8096 * 4;
+	Task_attributes.name = "measurementTask";
+	Task_attributes.priority = (osPriority_t) osPriorityNormal;
+	osThreadNew(measurementTask, nullptr, &Task_attributes);
 
 	/* USER CODE END RTOS_THREADS */
 
@@ -214,7 +222,7 @@ void measurementTask(void*)
 		for (;;)
 			osDelay(1000);
 	}
-	adc.setExcitationMagnitude(ADS124S0::EXCITATION_CURRENT::_50uA);
+	adc.setExcitationMagnitude(ADS124S0::EXCITATION_CURRENT::_10uA);
 	adc.routeExcitation1(10); // route the excitation current to the thermistor
 	adc.routeExcitation2(11);
 	double internals[2];
@@ -223,10 +231,64 @@ void measurementTask(void*)
 	auto thermEntry1 = OD_ENTRY_H6000_thermopile1;
 	auto thermEntry2 = OD_ENTRY_H6001_thermopile2;
 
+
+
+	// SD INIT START
+
+	MX_FATFS_Init();
+	const char *path = "/";
+	const char *name = "sensor_log.csv";
+
+	FATFS fs;  // file system
+	FIL fil; // File
+	FRESULT fresult;  // result
+	UINT bw;  // File read/write count
+	bool fsOK = false;
+	char buffer[512];
+	int size;
+
+	std::string fsbuffer;
+
+	// Mount
+	fresult = f_mount(&fs, path, 1);	// mount partition
+	if(fresult != FR_OK) goto endfs_init;
+
+	// CSV log setup
+	fresult = f_open(&fil, name,
+	FA_OPEN_APPEND | FA_WRITE | FA_OPEN_ALWAYS | FA_READ); // Open (or create) file
+	if(fresult != FR_OK) goto endfs_init;
+
+	fresult = f_lseek(&fil, 0); // Go to beginning of file
+	if(fresult != FR_OK) goto endfs_init;
+
+	size =
+			sprintf(buffer,
+					"﻿Time(ms),T1CA(v),T1CB(v),T1CC(v),T1CD(v),T1Therm(c),T2CA(v),T2CB(v),T2CC(v),T2CD(v),T2Therm(c)\n");
+	fresult = f_write(&fil, buffer, size, &bw); // Write CSV header
+	if(fresult != FR_OK) goto endfs_init;
+
+	fresult = f_lseek(&fil, f_size(&fil)); // Go to end of file for appending
+	if(fresult != FR_OK) goto endfs_init;
+
+	fsOK = true;
+	fsbuffer.reserve(121 * 60 * 30); // save for 30 minutes
+
+endfs_init:
+	// SD INIT END
+	fsbuffer.clear();
+
+
+
+
+
+
 	for (;;)
 	{
-		internals[0] = toTemp((toVoltage(adc.readChannel(10)) - 1.25) / 0.00005); // get voltage then divide by excitation current to get resistance
-		internals[1] = toTemp((toVoltage(adc.readChannel(11)) - 1.25) / 0.00005); // get voltage then divide by excitation current to get resistance
+		internals[0] = toTemp((toVoltage(adc.readChannel(10)) - 1.25) / 0.00001); // get voltage then divide by excitation current to get resistance
+		OD_set_f32(thermEntry1, 5, internals[0], true);
+
+		internals[1] = toTemp((toVoltage(adc.readChannel(11)) - 1.25) / 0.00001); // get voltage then divide by excitation current to get resistance
+		OD_set_f32(thermEntry2, 5, internals[1], true);
 
 		for (int idx = 0; idx < 8; idx++)
 		{
@@ -242,12 +304,38 @@ void measurementTask(void*)
 			osDelay(1);
 		}
 
+
+		if(fsOK)
+		{
+			// Filesystem should be active....
+			size = sprintf(buffer, "%ld,"
+					"%8.8f,%8.8f,"
+					"%8.8f,%8.8f,%8.8f,%8.8f,"
+					"%8.8f,%8.8f,%8.8f,%8.8f\n", HAL_GetTick(), externals[0], externals[1],
+					externals[2], externals[3], internals[0], externals[4],
+					externals[5], externals[6], externals[7], internals[1]);
+			fsbuffer.append(buffer);
+
+			if( (fsbuffer.capacity() - fsbuffer.size()) <= 121 )
+			{
+				// No more space, flush to SD
+				for(size_t idx = 0; idx < fsbuffer.size();)
+				{
+					auto sizeToWrite = std::min((uint32_t)512, (uint32_t)(fsbuffer.size() - idx));
+					fresult = f_write(&fil, fsbuffer.data() + idx, sizeToWrite, &bw);
+					idx += sizeToWrite;
+				}
+				fresult = f_sync(&fil);
+				fsbuffer.clear();
+			}
+		}
+
 		ilog.info(
-				"Thermopile1- cA=%8.4fV, cB=%8.4fV, cC=%8.4fV, cD=%8.4fV, therm=%8.4fohm",
+				"Thermopile1- cA=%8.4fV, cB=%8.4fV, cC=%8.4fV, cD=%8.4fV, therm=%8.4f *C",
 				externals[0], externals[1], externals[2], externals[3],
 				internals[0]);
 		ilog.info(
-				"Thermopile2- cA=%8.4fV, cB=%8.4fV, cC=%8.4fV, cD=%8.4fV, therm=%8.4fohm",
+				"Thermopile2- cA=%8.4fV, cB=%8.4fV, cC=%8.4fV, cD=%8.4fV, therm=%8.4f *C",
 				externals[4], externals[5], externals[6], externals[7],
 				internals[1]);
 		ilog.info(

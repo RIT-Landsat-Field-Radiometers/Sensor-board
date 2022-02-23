@@ -14,9 +14,9 @@
         Project File: sensor.xdd
         File Version: 1
 
-        Created:      9/30/2021 2:08:49 PM
+        Created:      9/30/2021 1:08:49 PM
         Created By:   
-        Modified:     10/6/2021 7:40:51 PM
+        Modified:     2/4/2022 11:02:18 AM
         Modified By:  
 
     Device Info:
@@ -40,7 +40,7 @@
 #define OD_CNT_SYNC_PROD 1
 #define OD_CNT_EM_PROD 1
 #define OD_CNT_HB_PROD 1
-#define OD_CNT_TPDO 4
+#define OD_CNT_TPDO 5
 
 
 /*******************************************************************************
@@ -72,22 +72,47 @@ typedef struct {
         uint8_t maxSub_index;
         uint32_t COB_IDUsedByTPDO;
         uint8_t transmissionType;
+        uint16_t inhibitTime;
+        uint8_t compatibilityEntry;
+        uint16_t eventTimer;
+        uint8_t SYNCStartValue;
     } x1800_TPDOCommunicationParameter;
     struct {
         uint8_t maxSub_index;
         uint32_t COB_IDUsedByTPDO;
         uint8_t transmissionType;
+        uint16_t inhibitTime;
+        uint8_t compatibilityEntry;
+        uint16_t eventTimer;
+        uint8_t SYNCStartValue;
     } x1801_TPDOCommunicationParameter;
     struct {
         uint8_t maxSub_index;
         uint32_t COB_IDUsedByTPDO;
         uint8_t transmissionType;
+        uint16_t inhibitTime;
+        uint8_t compatibilityEntry;
+        uint16_t eventTimer;
+        uint8_t SYNCStartValue;
     } x1802_TPDOCommunicationParameter;
     struct {
         uint8_t maxSub_index;
         uint32_t COB_IDUsedByTPDO;
         uint8_t transmissionType;
+        uint16_t inhibitTime;
+        uint8_t compatibilityEntry;
+        uint16_t eventTimer;
+        uint8_t SYNCStartValue;
     } x1803_TPDOCommunicationParameter;
+    struct {
+        uint8_t maxSub_index;
+        uint32_t COB_IDUsedByTPDO;
+        uint8_t transmissionType;
+        uint16_t inhibitTime;
+        uint8_t compatibilityEntry;
+        uint16_t eventTimer;
+        uint8_t SYNCStartValue;
+    } x1804_TPDOCommunicationParameter;
     struct {
         uint8_t numberOfMappedObjects;
         uint32_t mappedObject_1;
@@ -108,6 +133,11 @@ typedef struct {
         uint32_t mappedObject_1;
         uint32_t mappedObject_2;
     } x1A03_TPDOMappingParameter;
+    struct {
+        uint8_t numberOfMappedObjects;
+        uint32_t mappedObject_1;
+        uint32_t mappedObject_2;
+    } x1A04_TPDOMappingParameter;
 } OD_PERSIST_COMM_t;
 
 typedef struct {
@@ -118,6 +148,7 @@ typedef struct {
         float32_t channelB;
         float32_t channelC;
         float32_t channelD;
+        float32_t therm;
     } x6000_thermopile1;
     struct {
         uint8_t highestSub_indexSupported;
@@ -125,6 +156,7 @@ typedef struct {
         float32_t channelB;
         float32_t channelC;
         float32_t channelD;
+        float32_t therm;
     } x6001_thermopile2;
 } OD_RAM_t;
 
@@ -162,12 +194,14 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H1801 &OD->list[12]
 #define OD_ENTRY_H1802 &OD->list[13]
 #define OD_ENTRY_H1803 &OD->list[14]
-#define OD_ENTRY_H1A00 &OD->list[15]
-#define OD_ENTRY_H1A01 &OD->list[16]
-#define OD_ENTRY_H1A02 &OD->list[17]
-#define OD_ENTRY_H1A03 &OD->list[18]
-#define OD_ENTRY_H6000 &OD->list[19]
-#define OD_ENTRY_H6001 &OD->list[20]
+#define OD_ENTRY_H1804 &OD->list[15]
+#define OD_ENTRY_H1A00 &OD->list[16]
+#define OD_ENTRY_H1A01 &OD->list[17]
+#define OD_ENTRY_H1A02 &OD->list[18]
+#define OD_ENTRY_H1A03 &OD->list[19]
+#define OD_ENTRY_H1A04 &OD->list[20]
+#define OD_ENTRY_H6000 &OD->list[21]
+#define OD_ENTRY_H6001 &OD->list[22]
 
 
 /*******************************************************************************
@@ -188,12 +222,14 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H1801_TPDOCommunicationParameter &OD->list[12]
 #define OD_ENTRY_H1802_TPDOCommunicationParameter &OD->list[13]
 #define OD_ENTRY_H1803_TPDOCommunicationParameter &OD->list[14]
-#define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[15]
-#define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[16]
-#define OD_ENTRY_H1A02_TPDOMappingParameter &OD->list[17]
-#define OD_ENTRY_H1A03_TPDOMappingParameter &OD->list[18]
-#define OD_ENTRY_H6000_thermopile1 &OD->list[19]
-#define OD_ENTRY_H6001_thermopile2 &OD->list[20]
+#define OD_ENTRY_H1804_TPDOCommunicationParameter &OD->list[15]
+#define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[16]
+#define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[17]
+#define OD_ENTRY_H1A02_TPDOMappingParameter &OD->list[18]
+#define OD_ENTRY_H1A03_TPDOMappingParameter &OD->list[19]
+#define OD_ENTRY_H1A04_TPDOMappingParameter &OD->list[20]
+#define OD_ENTRY_H6000_thermopile1 &OD->list[21]
+#define OD_ENTRY_H6001_thermopile2 &OD->list[22]
 
 
 /*******************************************************************************

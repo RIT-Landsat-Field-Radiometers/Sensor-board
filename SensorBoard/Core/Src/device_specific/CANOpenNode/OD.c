@@ -11,7 +11,7 @@
 
 #define OD_DEFINITION
 #include "OD.h"
-
+#include <math.h>
 #if CO_VERSION_MAJOR < 4
 #error This Object dictionary is compatible with CANopenNode V4.0 and above!
 #endif
@@ -36,24 +36,49 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x1019_synchronousCounterOverflowValue = 0x00,
     .x1800_TPDOCommunicationParameter = {
-        .maxSub_index = 0x02,
+        .maxSub_index = 0x06,
         .COB_IDUsedByTPDO = 0x40000180,
-        .transmissionType = 0x01
+        .transmissionType = 0x01,
+        .inhibitTime = 0x0000,
+        .compatibilityEntry = 0x00,
+        .eventTimer = 0x0000,
+        .SYNCStartValue = 0x00
     },
     .x1801_TPDOCommunicationParameter = {
-        .maxSub_index = 0x02,
+        .maxSub_index = 0x06,
         .COB_IDUsedByTPDO = 0x40000280,
-        .transmissionType = 0x01
+        .transmissionType = 0x01,
+        .inhibitTime = 0x0000,
+        .compatibilityEntry = 0x00,
+        .eventTimer = 0x0000,
+        .SYNCStartValue = 0x00
     },
     .x1802_TPDOCommunicationParameter = {
-        .maxSub_index = 0x02,
+        .maxSub_index = 0x06,
         .COB_IDUsedByTPDO = 0x40000380,
-        .transmissionType = 0x01
+        .transmissionType = 0x01,
+        .inhibitTime = 0x0000,
+        .compatibilityEntry = 0x00,
+        .eventTimer = 0x0000,
+        .SYNCStartValue = 0x00
     },
     .x1803_TPDOCommunicationParameter = {
-        .maxSub_index = 0x02,
+        .maxSub_index = 0x06,
         .COB_IDUsedByTPDO = 0x40000480,
-        .transmissionType = 0x01
+        .transmissionType = 0x01,
+        .inhibitTime = 0x0000,
+        .compatibilityEntry = 0x00,
+        .eventTimer = 0x0000,
+        .SYNCStartValue = 0x00
+    },
+    .x1804_TPDOCommunicationParameter = {
+        .maxSub_index = 0x06,
+        .COB_IDUsedByTPDO = 0x40000580,
+        .transmissionType = 0x01,
+        .inhibitTime = 0x0000,
+        .compatibilityEntry = 0x00,
+        .eventTimer = 0x0000,
+        .SYNCStartValue = 0x00
     },
     .x1A00_TPDOMappingParameter = {
         .numberOfMappedObjects = 0x02,
@@ -74,24 +99,31 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .numberOfMappedObjects = 0x02,
         .mappedObject_1 = 0x60000420,
         .mappedObject_2 = 0x60010420
+    },
+    .x1A04_TPDOMappingParameter = {
+        .numberOfMappedObjects = 0x02,
+        .mappedObject_1 = 0x60000520,
+        .mappedObject_2 = 0x60010520
     }
 };
 
 OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x1001_errorRegister = 0x00,
     .x6000_thermopile1 = {
-        .highestSub_indexSupported = 0x04,
-        .channelA = 0,
-        .channelB = 0,
-        .channelC = 0,
-        .channelD = 0
+        .highestSub_indexSupported = 0x05,
+        .channelA = NAN,
+        .channelB = NAN,
+        .channelC = NAN,
+        .channelD = NAN,
+        .therm = NAN
     },
     .x6001_thermopile2 = {
-        .highestSub_indexSupported = 0x04,
-        .channelA = 0,
-        .channelB = 0,
-        .channelC = 0,
-        .channelD = 0
+        .highestSub_indexSupported = 0x05,
+        .channelA = NAN,
+        .channelB = NAN,
+        .channelC = NAN,
+        .channelD = NAN,
+        .therm = NAN
     }
 };
 
@@ -112,16 +144,18 @@ typedef struct {
     OD_obj_var_t o_1017_producerHeartbeatTime;
     OD_obj_record_t o_1018_identity[5];
     OD_obj_var_t o_1019_synchronousCounterOverflowValue;
-    OD_obj_record_t o_1800_TPDOCommunicationParameter[3];
-    OD_obj_record_t o_1801_TPDOCommunicationParameter[3];
-    OD_obj_record_t o_1802_TPDOCommunicationParameter[3];
-    OD_obj_record_t o_1803_TPDOCommunicationParameter[3];
+    OD_obj_record_t o_1800_TPDOCommunicationParameter[7];
+    OD_obj_record_t o_1801_TPDOCommunicationParameter[7];
+    OD_obj_record_t o_1802_TPDOCommunicationParameter[7];
+    OD_obj_record_t o_1803_TPDOCommunicationParameter[7];
+    OD_obj_record_t o_1804_TPDOCommunicationParameter[7];
     OD_obj_record_t o_1A00_TPDOMappingParameter[3];
     OD_obj_record_t o_1A01_TPDOMappingParameter[3];
     OD_obj_record_t o_1A02_TPDOMappingParameter[3];
     OD_obj_record_t o_1A03_TPDOMappingParameter[3];
-    OD_obj_record_t o_6000_thermopile1[5];
-    OD_obj_record_t o_6001_thermopile2[5];
+    OD_obj_record_t o_1A04_TPDOMappingParameter[3];
+    OD_obj_record_t o_6000_thermopile1[6];
+    OD_obj_record_t o_6001_thermopile2[6];
 } ODObjs_t;
 
 static CO_PROGMEM ODObjs_t ODObjs = {
@@ -228,6 +262,30 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .subIndex = 2,
             .attribute = 0,
             .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1800_TPDOCommunicationParameter.inhibitTime,
+            .subIndex = 3,
+            .attribute = ODA_MB,
+            .dataLength = 2
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1800_TPDOCommunicationParameter.compatibilityEntry,
+            .subIndex = 4,
+            .attribute = 0,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1800_TPDOCommunicationParameter.eventTimer,
+            .subIndex = 5,
+            .attribute = ODA_MB,
+            .dataLength = 2
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1800_TPDOCommunicationParameter.SYNCStartValue,
+            .subIndex = 6,
+            .attribute = 0,
+            .dataLength = 1
         }
     },
     .o_1801_TPDOCommunicationParameter = {
@@ -246,6 +304,30 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         {
             .dataOrig = &OD_PERSIST_COMM.x1801_TPDOCommunicationParameter.transmissionType,
             .subIndex = 2,
+            .attribute = 0,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1801_TPDOCommunicationParameter.inhibitTime,
+            .subIndex = 3,
+            .attribute = ODA_MB,
+            .dataLength = 2
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1801_TPDOCommunicationParameter.compatibilityEntry,
+            .subIndex = 4,
+            .attribute = 0,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1801_TPDOCommunicationParameter.eventTimer,
+            .subIndex = 5,
+            .attribute = ODA_MB,
+            .dataLength = 2
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1801_TPDOCommunicationParameter.SYNCStartValue,
+            .subIndex = 6,
             .attribute = 0,
             .dataLength = 1
         }
@@ -268,6 +350,30 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .subIndex = 2,
             .attribute = 0,
             .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1802_TPDOCommunicationParameter.inhibitTime,
+            .subIndex = 3,
+            .attribute = ODA_MB,
+            .dataLength = 2
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1802_TPDOCommunicationParameter.compatibilityEntry,
+            .subIndex = 4,
+            .attribute = 0,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1802_TPDOCommunicationParameter.eventTimer,
+            .subIndex = 5,
+            .attribute = ODA_MB,
+            .dataLength = 2
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1802_TPDOCommunicationParameter.SYNCStartValue,
+            .subIndex = 6,
+            .attribute = 0,
+            .dataLength = 1
         }
     },
     .o_1803_TPDOCommunicationParameter = {
@@ -286,6 +392,74 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         {
             .dataOrig = &OD_PERSIST_COMM.x1803_TPDOCommunicationParameter.transmissionType,
             .subIndex = 2,
+            .attribute = 0,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1803_TPDOCommunicationParameter.inhibitTime,
+            .subIndex = 3,
+            .attribute = ODA_MB,
+            .dataLength = 2
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1803_TPDOCommunicationParameter.compatibilityEntry,
+            .subIndex = 4,
+            .attribute = 0,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1803_TPDOCommunicationParameter.eventTimer,
+            .subIndex = 5,
+            .attribute = ODA_MB,
+            .dataLength = 2
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1803_TPDOCommunicationParameter.SYNCStartValue,
+            .subIndex = 6,
+            .attribute = 0,
+            .dataLength = 1
+        }
+    },
+    .o_1804_TPDOCommunicationParameter = {
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1804_TPDOCommunicationParameter.maxSub_index,
+            .subIndex = 0,
+            .attribute = 0,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1804_TPDOCommunicationParameter.COB_IDUsedByTPDO,
+            .subIndex = 1,
+            .attribute = ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1804_TPDOCommunicationParameter.transmissionType,
+            .subIndex = 2,
+            .attribute = 0,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1804_TPDOCommunicationParameter.inhibitTime,
+            .subIndex = 3,
+            .attribute = ODA_MB,
+            .dataLength = 2
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1804_TPDOCommunicationParameter.compatibilityEntry,
+            .subIndex = 4,
+            .attribute = 0,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1804_TPDOCommunicationParameter.eventTimer,
+            .subIndex = 5,
+            .attribute = ODA_MB,
+            .dataLength = 2
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1804_TPDOCommunicationParameter.SYNCStartValue,
+            .subIndex = 6,
             .attribute = 0,
             .dataLength = 1
         }
@@ -370,6 +544,26 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .dataLength = 4
         }
     },
+    .o_1A04_TPDOMappingParameter = {
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1A04_TPDOMappingParameter.numberOfMappedObjects,
+            .subIndex = 0,
+            .attribute = 0,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1A04_TPDOMappingParameter.mappedObject_1,
+            .subIndex = 1,
+            .attribute = ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1A04_TPDOMappingParameter.mappedObject_2,
+            .subIndex = 2,
+            .attribute = ODA_MB,
+            .dataLength = 4
+        }
+    },
     .o_6000_thermopile1 = {
         {
             .dataOrig = &OD_RAM.x6000_thermopile1.highestSub_indexSupported,
@@ -398,6 +592,12 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         {
             .dataOrig = &OD_RAM.x6000_thermopile1.channelD,
             .subIndex = 4,
+            .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_RAM.x6000_thermopile1.therm,
+            .subIndex = 5,
             .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
             .dataLength = 4
         }
@@ -432,6 +632,12 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .subIndex = 4,
             .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
             .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_RAM.x6001_thermopile2.therm,
+            .subIndex = 5,
+            .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
+            .dataLength = 4
         }
     }
 };
@@ -452,16 +658,18 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x1017, 0x01, ODT_VAR, &ODObjs.o_1017_producerHeartbeatTime, NULL},
     {0x1018, 0x05, ODT_REC, &ODObjs.o_1018_identity, NULL},
     {0x1019, 0x01, ODT_VAR, &ODObjs.o_1019_synchronousCounterOverflowValue, NULL},
-    {0x1800, 0x03, ODT_REC, &ODObjs.o_1800_TPDOCommunicationParameter, NULL},
-    {0x1801, 0x03, ODT_REC, &ODObjs.o_1801_TPDOCommunicationParameter, NULL},
-    {0x1802, 0x03, ODT_REC, &ODObjs.o_1802_TPDOCommunicationParameter, NULL},
-    {0x1803, 0x03, ODT_REC, &ODObjs.o_1803_TPDOCommunicationParameter, NULL},
+    {0x1800, 0x07, ODT_REC, &ODObjs.o_1800_TPDOCommunicationParameter, NULL},
+    {0x1801, 0x07, ODT_REC, &ODObjs.o_1801_TPDOCommunicationParameter, NULL},
+    {0x1802, 0x07, ODT_REC, &ODObjs.o_1802_TPDOCommunicationParameter, NULL},
+    {0x1803, 0x07, ODT_REC, &ODObjs.o_1803_TPDOCommunicationParameter, NULL},
+    {0x1804, 0x07, ODT_REC, &ODObjs.o_1804_TPDOCommunicationParameter, NULL},
     {0x1A00, 0x03, ODT_REC, &ODObjs.o_1A00_TPDOMappingParameter, NULL},
     {0x1A01, 0x03, ODT_REC, &ODObjs.o_1A01_TPDOMappingParameter, NULL},
     {0x1A02, 0x03, ODT_REC, &ODObjs.o_1A02_TPDOMappingParameter, NULL},
     {0x1A03, 0x03, ODT_REC, &ODObjs.o_1A03_TPDOMappingParameter, NULL},
-    {0x6000, 0x05, ODT_REC, &ODObjs.o_6000_thermopile1, NULL},
-    {0x6001, 0x05, ODT_REC, &ODObjs.o_6001_thermopile2, NULL},
+    {0x1A04, 0x03, ODT_REC, &ODObjs.o_1A04_TPDOMappingParameter, NULL},
+    {0x6000, 0x06, ODT_REC, &ODObjs.o_6000_thermopile1, NULL},
+    {0x6001, 0x06, ODT_REC, &ODObjs.o_6001_thermopile2, NULL},
     {0x0000, 0x00, 0, NULL, NULL}
 };
 
