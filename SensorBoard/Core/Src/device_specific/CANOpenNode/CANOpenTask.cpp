@@ -42,6 +42,7 @@ extern DS28CM00_ID id1;
 
 static uint8_t pendingID = CO_LSS_NODE_ID_ASSIGNMENT;
 static uint16_t pendingRate = 1000;
+static uint32_t resetCounter = 0;
 
 
 void canopen_start(void)
@@ -158,5 +159,8 @@ void canopen_oneMs(void)
 		leds.turnOff(color::GREEN);
 	}
 	__HAL_TIM_SET_COUNTER(&htim16, 0);
+
+	// log CANopen error, then soft reset (reset all 3 boards)
+	// soft reset
 }
 

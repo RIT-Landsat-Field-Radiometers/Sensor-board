@@ -144,6 +144,9 @@ int main(void)
 	/* USER CODE BEGIN WHILE */
 	while (1)
 	{
+//		HAL_Delay(5000);
+//		HAL_NVIC_SystemReset();
+
 		/* USER CODE END WHILE */
 		/* USER CODE BEGIN 3 */
 	}

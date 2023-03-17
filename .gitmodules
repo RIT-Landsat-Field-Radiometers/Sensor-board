@@ -1,3 +1,6 @@
 [submodule "SensorBoard/Core/Src/shared_utils"]
 	path = SensorBoard/Core/Src/shared_utils
 	url = https://rot2666@bitbucket.org/rot2666/shared_utils.git
+[submodule "SensorBoard/Core/Src/shared-utils"]
+	path = SensorBoard/Core/Src/shared-utils
+	url = git@github.com:RIT-Landsat-Field-Radiometers/shared-utils.git
