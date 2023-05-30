@@ -20,7 +20,6 @@ dist/
 *.jar
 
 # Maven
-target/
 dist/
 
 # JetBrains IDE
@@ -47,4 +46,7 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+
+# STM project files
+debug/
 
