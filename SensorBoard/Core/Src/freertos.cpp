@@ -333,38 +333,41 @@ endfs_init:
 		}
 
 //------------	 UART print for normal radiometer unit	 ----------------------------------------
-		ilog.info(
-				"Thermopile1- cA=%8.4fV, cB=%8.4fV, cC=%8.4fV, cD=%8.4fV, therm=%8.4f *C",
-				externals[0], externals[1], externals[2], externals[3],
-				internals[0]);
-		ilog.info(
-				"Thermopile2- cA=%8.4fV, cB=%8.4fV, cC=%8.4fV, cD=%8.4fV, therm=%8.4f *C",
-				externals[4], externals[5], externals[6], externals[7],
-				internals[1]);
-		ilog.info(
-				"==========================================================================================================================================");
+//		ilog.info(
+//				"Thermopile1- cA=%8.4fV, cB=%8.4fV, cC=%8.4fV, cD=%8.4fV, therm=%8.4f *C",
+//				externals[0], externals[1], externals[2], externals[3],
+//				internals[0]);
+//		ilog.info(
+//				"Thermopile2- cA=%8.4fV, cB=%8.4fV, cC=%8.4fV, cD=%8.4fV, therm=%8.4f *C",
+//				externals[4], externals[5], externals[6], externals[7],
+//				internals[1]);
+//		ilog.info(
+//				"==========================================================================================================================================");
 
 
 //------------	 UART print for use with the handheld unit 	 ----------------------------------------
 
-		// scale the externals to only take up 3 spaces on display
-			// example: 1.23456V --> 123
-//		for (int val_idx=0; val_idx<8; val_idx++)
-//		{
-//			externals[val_idx] = externals[val_idx] * 100;
-//		}
-//
-//
-//		uartMan.print("1:%3.0f  5:%3.0f  A:%2.0f\n\r"
-//					  "2:%3.0f  6:%3.0f\n\r"
-//					  "3:%3.0f  7:%3.0f  B:%2.0f\n\r"
-//					  "4:%3.0f  8:%3.0f\n\r",
-//					  externals[0], externals[4], internals[0],
-//					  externals[1], externals[5],
-//					  externals[2], externals[6], internals[1],
-//					  externals[3], externals[7]
-//					  );
-//		osDelay(500);
+
+
+
+//		 scale the externals to only take up 3 spaces on display
+//			 example: 1.23456V --> 123
+		for (int val_idx=0; val_idx<8; val_idx++)
+		{
+			externals[val_idx] = externals[val_idx] * 100;
+		}
+
+
+		uartMan.print("1:%3.0f  5:%3.0f  A:%2.0f\n\r"
+					  "2:%3.0f  6:%3.0f\n\r"
+					  "3:%3.0f  7:%3.0f  B:%2.0f\n\r"
+					  "4:%3.0f  8:%3.0f\n\r",
+					  externals[0], externals[4], internals[0],
+					  externals[1], externals[5],
+					  externals[2], externals[6], internals[1],
+					  externals[3], externals[7]
+					  );
+		osDelay(500);
 	}
 }
 
